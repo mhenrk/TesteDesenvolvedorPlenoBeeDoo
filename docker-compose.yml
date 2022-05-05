@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8
+    container_name: mysql
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    hostname: dbsql
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=$DB_PASSWORD
+    networks:
+      - apisql
+  backend:
+    build: .
+    depends_on:
+      - mysqldb
+    container_name: backend
+    env_file: .env
+    environment:
+      - MYSQL_HOST=$DB_HOST
+      - MYSQL_USER=$DB_USERNAME
+      - MYSQL_PASSWORD=$DB_PASSWORD
+    ports:
+      - '3333:3333'
+    expose:
+      - 3333
+    command: npm run dev
+    networks:
+      - apisql
+
+networks:
+  apisql:
+    driver: bridge
+
